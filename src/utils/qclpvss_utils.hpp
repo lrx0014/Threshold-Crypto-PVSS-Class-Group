@@ -30,6 +30,7 @@ namespace UTILS {
       public:
         /* constructors */
         PublicKey(const CL_HSMqk&, const SecretKey&);
+        PublicKey(const CL_HSMqk&, const QFI&);
 
         /* getters */
         const QFI& get() const;

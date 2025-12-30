@@ -44,14 +44,41 @@ endif ()
 ################################################################################
 find_package (gmp REQUIRED)
 find_package (OpenSSL REQUIRED)
-find_package (benchmark) #Google Benchmark
+find_package (benchmark QUIET) # Google Benchmark (optional; used only for benchmarks)
 
 # Add the bicycl library
 add_subdirectory(include/bicycl)
 
 # Add your own source code in the "src" folder
 add_subdirectory(src)
+add_subdirectory(wrapper)
 add_subdirectory(tests)
-add_subdirectory(benchmarks)
+if (benchmark_FOUND)
+  add_subdirectory(benchmarks)
+else ()
+  message (STATUS "Google Benchmark not found; skipping benchmarks target")
+endif ()
+add_subdirectory(demo)
 
 # Add any additional targets or configurations here if needed
+
+# Bundle convenience target to gather linkable artifacts for non-CMake consumers
+set(DIST_ROOT ${CMAKE_CURRENT_SOURCE_DIR}/dist)
+add_custom_target(bundle_static ALL
+    DEPENDS pvss_wrapper project
+    COMMAND ${CMAKE_COMMAND} -E make_directory ${DIST_ROOT}/lib
+    COMMAND ${CMAKE_COMMAND} -E make_directory ${DIST_ROOT}/include
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+            $<TARGET_FILE:pvss_wrapper>
+            ${DIST_ROOT}/lib/
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+            $<TARGET_FILE:project>
+            ${DIST_ROOT}/lib/
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+            ${CMAKE_CURRENT_SOURCE_DIR}/wrapper/pvss.h
+            ${DIST_ROOT}/include/pvss.h
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+            ${CMAKE_CURRENT_SOURCE_DIR}/include/bicycl
+            ${DIST_ROOT}/include/bicycl
+    VERBATIM
+)

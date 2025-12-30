@@ -22,6 +22,20 @@ PublicKey::PublicKey(const CL_HSMqk& cl, const SecretKey& sk) {
     }
 }
 
+PublicKey::PublicKey(const CL_HSMqk& cl, const QFI& pk) : pk_(pk) {
+    d_ = (cl.encrypt_randomness_bound().nbits() + 1) / 2;
+    e_ = d_ / 2 + 1;
+
+    pk_de_precomp_ = pk_;
+    for (size_t i = 0; i < d_ + e_; i++) {
+        if (i == e_)
+            pk_e_precomp_ = pk_de_precomp_;
+        if (i == d_)
+            pk_d_precomp_ = pk_de_precomp_;
+        cl.Cl_G().nudupl(pk_de_precomp_, pk_de_precomp_);
+    }
+}
+
 const QFI& PublicKey::get() const {
     return pk_;
 }

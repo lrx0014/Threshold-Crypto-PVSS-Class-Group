@@ -31,6 +31,19 @@ namespace NIZK {
             Mpz::mul(SCA_, S_, C_);
             Mpz::add(SCA_, SCA_, A_);
         }
+
+        const vector<Mpz>& responses() const {
+            return u_;
+        }
+
+        const Mpz& challenge() const {
+            return c_;
+        }
+
+        void set_proof(const vector<Mpz>& responses, const Mpz& challenge) {
+            u_ = responses;
+            c_ = challenge;
+        }
     };
 }    // namespace NIZK
 
